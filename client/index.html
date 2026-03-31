@@ -1,103 +1,214 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SpiceCraft Kitchen</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>SpiceCraft</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f172a, #020617);
+      color: white;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+    }
+
+    header h1 {
+      color: #facc15;
+    }
+
+    .login {
+      text-align: center;
+      margin: 20px;
+    }
+
+    input {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    button {
+      background: linear-gradient(45deg, #facc15, #fb923c);
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 15px;
+      padding: 15px;
+      transition: 0.3s;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .price {
+      color: #22c55e;
+      margin: 10px 0;
+    }
+
+    .cart {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 15px;
+    }
+
+    .order-btn {
+      background: linear-gradient(45deg, #22c55e, #4ade80);
+      margin-top: 10px;
+    }
+  </style>
 </head>
 
-<body class="bg-black text-white p-6">
+<body>
 
-<h1 class="text-4xl text-yellow-500 text-center mb-6">SpiceCraft 🔥</h1>
+<header>
+  <h1>SpiceCraft 🔥</h1>
+  <div id="userDisplay"></div>
+</header>
 
-<div class="grid grid-cols-2 gap-6">
-
-  <div class="bg-gray-900 p-4 rounded">
-    <h2>Paneer Butter Masala 🥦</h2>
-    <p>₹220</p>
-    <button onclick="addItem('Paneer Butter Masala',220)" 
-      class="bg-yellow-500 px-3 py-1 mt-2 rounded">
-      Add
-    </button>
-  </div>
-
-  <div class="bg-gray-900 p-4 rounded">
-    <h2>Chicken Biryani 🍗</h2>
-    <p>₹280</p>
-    <button onclick="addItem('Chicken Biryani',280)" 
-      class="bg-yellow-500 px-3 py-1 mt-2 rounded">
-      Add
-    </button>
-  </div>
-   <div class="bg-gray-900 p-4 rounded">
-  <h3>Veg Fried Rice 🥗</h3>
-  <p>₹150</p>
-  <button onclick="addItem('Veg Fried Rice', 150)">
-    Add
-  </button>
+<div class="login" id="loginSection">
+  <input id="username" placeholder="Enter username">
+  <button onclick="login()">Login</button>
 </div>
 
-</div>
+<div class="container">
 
-<div class="mt-10 bg-gray-900 p-4 rounded">
-  <h2>Cart 🛒</h2>
-  <div id="cart"></div>
-  <h3 id="total"></h3>
+  <div class="grid">
 
-  <button onclick="placeOrder()" 
-    class="bg-green-500 px-4 py-2 mt-4 rounded">
-    Place Order 🚀
-  </button>
+    <div class="card">
+      <h3>Paneer Butter Masala 🥗</h3>
+      <div class="price">₹220</div>
+      <button onclick="addToCart('Paneer Butter Masala',220)">Add</button>
+    </div>
+
+    <div class="card">
+      <h3>Chicken Biryani 🍗</h3>
+      <div class="price">₹280</div>
+      <button onclick="addToCart('Chicken Biryani',280)">Add</button>
+    </div>
+
+    <div class="card">
+      <h3>Veg Fried Rice 🍚</h3>
+      <div class="price">₹150</div>
+      <button onclick="addToCart('Veg Fried Rice',150)">Add</button>
+    </div>
+
+    <div class="card">
+      <h3>Butter Naan 🫓</h3>
+      <div class="price">₹40</div>
+      <button onclick="addToCart('Butter Naan',40)">Add</button>
+    </div>
+
+    <div class="card">
+      <h3>Gulab Jamun 🍮</h3>
+      <div class="price">₹90</div>
+      <button onclick="addToCart('Gulab Jamun',90)">Add</button>
+    </div>
+
+  </div>
+
+  <div class="cart">
+    <h2>Cart 🛒</h2>
+    <ul id="cartList"></ul>
+    <h3 id="total">Total: ₹0</h3>
+    <button class="order-btn" onclick="placeOrder()">Place Order 🚀</button>
+  </div>
+
 </div>
 
 <script>
+
+let user = localStorage.getItem("user");
 let cart = [];
 
-// ADD ITEM
-function addItem(name, price) {
-  console.log("Item added:", name);
-  cart.push({ name, price });
-  renderCart();
+if(user){
+  document.getElementById("userDisplay").innerText = "👋 " + user;
+  document.getElementById("loginSection").style.display = "none";
 }
 
-// SHOW CART
-function renderCart() {
-  let cartDiv = document.getElementById("cart");
-  let total = 0;
+function login(){
+  const username = document.getElementById("username").value;
 
-  cartDiv.innerHTML = "";
+  if(!username){
+    alert("Enter username");
+    return;
+  }
+
+  localStorage.setItem("user", username);
+  location.reload();
+}
+
+function addToCart(name, price){
+  cart.push({name, price});
+  updateCart();
+}
+
+function updateCart(){
+  let list = document.getElementById("cartList");
+  let total = 0;
+  list.innerHTML = "";
 
   cart.forEach(item => {
-    cartDiv.innerHTML += `<p>${item.name} - ₹${item.price}</p>`;
+    let li = document.createElement("li");
+    li.innerText = item.name + " - ₹" + item.price;
+    list.appendChild(li);
     total += item.price;
   });
 
   document.getElementById("total").innerText = "Total: ₹" + total;
 }
 
-// PLACE ORDER
-async function placeOrder() {
-  if(cart.length === 0){
-    alert("Cart is empty ❌");
+async function placeOrder(){
+  if(!user){
+    alert("Login first!");
     return;
   }
 
-  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  if(cart.length === 0){
+    alert("Cart is empty!");
+    return;
+  }
 
-  await fetch("http://localhost:3000/order", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      items: cart,
-      total: total
-    })
+  const res = await fetch('/order', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ user, cart })
   });
 
-  alert("✅ Order saved!");
+  const data = await res.json();
+  alert(data.message);
+
   cart = [];
-  renderCart();
+  updateCart();
 }
+
 </script>
 
 </body>
