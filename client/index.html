@@ -89,17 +89,33 @@
 </div>
 
 <script>
+  let cartData = JSON.parse(localStorage.getItem("cart")) || [];
   let total = 0;
 
-  function addToCart(item, price) {
-    const cart = document.getElementById('cart');
-    const li = document.createElement('li');
-    li.textContent = `${item} - ₹${price}`;
-    cart.appendChild(li);
+  const cart = document.getElementById('cart');
+  const totalEl = document.getElementById('total');
 
-    total += price;
-    document.getElementById('total').textContent = total;
+  function renderCart() {
+    cart.innerHTML = '';
+    total = 0;
+
+    cartData.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = `${item.name} - ₹${item.price}`;
+      cart.appendChild(li);
+      total += item.price;
+    });
+
+    totalEl.textContent = total;
   }
+
+  function addToCart(item, price) {
+    cartData.push({ name: item, price: price });
+    localStorage.setItem("cart", JSON.stringify(cartData));
+    renderCart();
+  }
+
+  renderCart();
 </script>
 
 </body>
